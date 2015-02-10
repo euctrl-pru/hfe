@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+ 
+#- Version: 1.0
+#- Author: Enrico Spinielli
+#- Date: 2015/02/10
+#- Copyright (C) 2015 Eurocontrol/PRU
+
+
+## Usage: compute [OPTION]... [FROM TO]
+## Compute Horizontal Flight Efficiency from FROM date to TO date.
+## 
+## Arguments:
+##   FROM                    a string date in the DD/MM/YYYY format.
+##   TO                      a string date in the DD/MM/YYYY format (strictly later than FROM)
+## 
+## Options:
+##   -h, --help              Print a usage message summarizing the command-line options, then exit.
+##   -V, --version           Output version information and exit.
+## 
+## Examples:
+## $ compute "02/01/2015" "15/02/2015"
+
+SCRIPT=$(basename ${BASH_SOURCE[0]})
+
+help=$(grep "^## " "${SCRIPT}" | cut -c 4-)
+version=$(grep "^#- "  "${SCRIPT}" | cut -c 4-)
+opt_h() {
+  echo "$help"
+}
+ 
+opt_v() {
+  echo "$version"
+}
+
+
+
+# Execute getopt
+TEMP=$(getopt -o :hV --long ":help,version" -n "$SCRIPT" -- "$@");
+eval set -- "$TEMP"
+
+while true; do
+   case $1 in
+   -h|--help)
+      opt_h
+      exit
+      ;;
+   -V|--version)
+      opt_v
+      exit
+      ;;
+   --)
+      shift
+      break
+      ;;
+   \?)
+      echo "Invalid option: -$OPTARG" >&2
+      opt_h
+      exit 1
+      ;;
+   *)
+      echo "Internal error!"
+      exit 1
+      ;;
+   esac
+done
+
+# there are 2 mandatory arguments
+if (( $# != 2 )); then
+   echo "Error: illegal number of parameters"
+   opt_h
+   exit 1
+fi
+
+
+# process FROM and TO
+shift $((OPTIND-1))  #getopts move on to the next argument.
+FROM=$(date -d "$(echo $1 | sed -r 's/(..)\/(..)\/(....)/\3-\2-\1/')")
+TO=$(date -d "$(echo $2 | sed -r 's/(..)\/(..)\/(....)/\3-\2-\1/')")
+
+
+
+if (( $(date -d "$FROM" +"%Y%m%d") < $(date -d "$TO" +"%Y%m%d") )); then
+   f=$(date -d "$FROM" +"%d-%b-%Y" | tr "[:upper:]" "[:lower:]")
+   t=$(date -d "$TO"   +"%d-%b-%Y" | tr "[:upper:]" "[:lower:]")
+   echo "sqlplus $DBUSR/$DBPWD @test5.sql \"$f\" \"$t\""
+else
+   echo "Error: TO is not after FROM."
+   opt_h
+   exit 1
+fi
