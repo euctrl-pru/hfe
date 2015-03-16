@@ -1,5 +1,5 @@
 /* Formatted on 30-10-2014 13:02:45 (QP5 v5.240.12305.39446) */
-CREATE OR REPLACE PACKAGE BODY PRUTEST.Hfe
+CREATE OR REPLACE PACKAGE BODY Hfe
 IS
    /*********************************************
    See package body for dependencies
@@ -166,7 +166,7 @@ IS
                   SELECT                                                --Lobt
                         Sam_id
 ,                        Model_type
-,                        PRUTEST.Cfmu_dist_km (Dep.Entry_lon
+,                        Cfmu_dist_km (Dep.Entry_lon
 ,                                              Dep.Entry_lat
 ,                                              Arr.Exit_lon
 ,                                              Arr.Exit_lat)
@@ -221,7 +221,7 @@ IS
 ,               Ades
 ,               Apt_gcd_dist_km
 ,               Ades_dist_km Traj_length
-,               PRUTEST.Cfmu_dist_km (Origin_lon
+,               Cfmu_dist_km (Origin_lon
 ,                                     Origin_lat
 ,                                     Destination_lon
 ,                                     Destination_lat)
@@ -663,23 +663,23 @@ IS
 ,               ROW_NUMBER ()
                 OVER (PARTITION BY Lobt, Model_type, Sam_id ORDER BY Seq_id)
 ,               End_gap_dist_km - Start_gap_dist_km
-,               PRUTEST.Cfmu_dist_km (Start_gap_lon
+,               Cfmu_dist_km (Start_gap_lon
 ,                                     Start_gap_lat
 ,                                     End_gap_lon
 ,                                     End_gap_lat)
-,                 (  PRUTEST.Cfmu_dist_km (Start_gap_lon
+,                 (  Cfmu_dist_km (Start_gap_lon
 ,                                          Start_gap_lat
 ,                                          Destination_lon
 ,                                          Destination_lat)
-                   - PRUTEST.Cfmu_dist_km (End_gap_lon
+                   - Cfmu_dist_km (End_gap_lon
 ,                                          End_gap_lat
 ,                                          Destination_lon
 ,                                          Destination_lat)
-                   + PRUTEST.Cfmu_dist_km (Origin_lon
+                   + Cfmu_dist_km (Origin_lon
 ,                                          Origin_lat
 ,                                          End_gap_lon
 ,                                          End_gap_lat)
-                   - PRUTEST.Cfmu_dist_km (Origin_lon
+                   - Cfmu_dist_km (Origin_lon
 ,                                          Origin_lat
 ,                                          Start_gap_lon
 ,                                          Start_gap_lat))
@@ -892,24 +892,24 @@ IS
 ,               GK_MES_AREA_ID
 ,               N.Entry_nb
 ,               X.Exit_dist_km - N.Entry_dist_km Nx_flown_km
-,               PRUTEST.Cfmu_dist_km (N.Entry_lon
+,               Cfmu_dist_km (N.Entry_lon
 ,                                     N.Entry_lat
 ,                                     X.Exit_lon
 ,                                     X.Exit_lat)
                    Nx_direct_km
-,                 (  PRUTEST.Cfmu_dist_km (N.Entry_lon
+,                 (  Cfmu_dist_km (N.Entry_lon
 ,                                          N.Entry_lat
 ,                                          X.Destination_lon
 ,                                          X.Destination_lat)
-                   - PRUTEST.Cfmu_dist_km (X.Exit_lon
+                   - Cfmu_dist_km (X.Exit_lon
 ,                                          X.Exit_lat
 ,                                          X.Destination_lon
 ,                                          X.Destination_lat)
-                   + PRUTEST.Cfmu_dist_km (N.Origin_lon
+                   + Cfmu_dist_km (N.Origin_lon
 ,                                          N.Origin_lat
 ,                                          X.Exit_lon
 ,                                          X.Exit_lat)
-                   - PRUTEST.Cfmu_dist_km (N.Origin_lon
+                   - Cfmu_dist_km (N.Origin_lon
 ,                                          N.Origin_lat
 ,                                          N.Entry_lon
 ,                                          N.Entry_lat))
@@ -1592,3 +1592,4 @@ IS
    END;
 END Hfe;
 /
+SHOW ERRORS

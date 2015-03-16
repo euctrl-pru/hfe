@@ -1,4 +1,4 @@
-CREATE OR REPLACE PACKAGE PRUTEST.Hfe
+CREATE OR REPLACE PACKAGE Hfe
 IS
    hfe_pkg_version                 CONSTANT NUMBER := 4.9;
 
@@ -85,3 +85,4 @@ IS
    PROCEDURE raise_hfe_error (keepgoing IN BOOLEAN);
 END Hfe;
 /
+SHOW ERRORS

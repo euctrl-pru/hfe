@@ -18,7 +18,7 @@
 ##   -V, --version           Output version information and exit.
 ## 
 ## Examples:
-## $ compute "02/01/2015" "15/02/2015"
+## $ compute "30/01/2015" "31/01/2015"
 
 SCRIPT=$(basename ${BASH_SOURCE[0]})
 
@@ -35,7 +35,7 @@ opt_v() {
 
 
 # Execute getopt
-TEMP=$(getopt -o :hV --long ":help,version" -n "$SCRIPT" -- "$@");
+TEMP=$(getopt -o :hV --long "help,version" -n "$SCRIPT" -- "$@");
 eval set -- "$TEMP"
 
 while true; do
@@ -79,10 +79,18 @@ TO=$(date -d "$(echo $2 | sed -r 's/(..)\/(..)\/(....)/\3-\2-\1/')")
 
 
 
-if (( $(date -d "$FROM" +"%Y%m%d") < $(date -d "$TO" +"%Y%m%d") )); then
+if (( $(date -d "$FROM" +"%Y%m%d") <= $(date -d "$TO" +"%Y%m%d") )); then
    f=$(date -d "$FROM" +"%d-%b-%Y" | tr "[:upper:]" "[:lower:]")
    t=$(date -d "$TO"   +"%d-%b-%Y" | tr "[:upper:]" "[:lower:]")
-   echo "sqlplus $DBUSR/$DBPWD @test5.sql \"$f\" \"$t\""
+   # see http://stackoverflow.com/a/14829264/963575
+   # also http://tkyte.blogspot.co.uk/2010/04/new-thing-about-sqlplus.html
+   sqlplus -s /nolog <<-EOF
+      WHENEVER OSERROR EXIT 9;
+      WHENEVER SQLERROR EXIT SQL.SQLCODE;
+      CONNECT $DBUSR/$DBPWD@$DBNAME;
+      SET ERRORLOGGING ON;
+      @@compute_from_to.sql "$f" "$t"
+EOF
 else
    echo "Error: TO is not after FROM."
    opt_h

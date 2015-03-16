@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+ 
+#- Version: 1.0
+#- Author: Enrico Spinielli
+#- Date: 2015/03/06
+#- Copyright (C) 2015 Eurocontrol/PRU
+
+
+## Usage: create [OPTION]
+## Create Horizontal Flight Efficiency tables & Co.
+## 
+## Assumptions:
+##   DBUSR                   environment variable for the relevant schema username.
+##   DBPWD                   environment variable for the relevant schema password.
+##   DBNAME                  environment variable for the relevant schema name.
+## 
+## Options:
+##   -h, --help              Print a usage message summarizing the command-line options, then exit.
+##   -V, --version           Output version information and exit.
+## 
+## Examples:
+## $ create
+
+SCRIPT=$(basename ${BASH_SOURCE[0]})
+
+help=$(grep "^## " "${SCRIPT}" | cut -c 4-)
+version=$(grep "^#- "  "${SCRIPT}" | cut -c 4-)
+opt_h() {
+  echo "$help"
+}
+ 
+opt_v() {
+  echo "$version"
+}
+
+
+
+# Execute getopt
+TEMP=$(getopt -o :hV --long "help,version" -n "$SCRIPT" -- "$@");
+eval set -- "$TEMP"
+
+while true; do
+   case $1 in
+   -h|--help)
+      opt_h
+      exit
+      ;;
+   -V|--version)
+      opt_v
+      exit
+      ;;
+   --)
+      shift
+      break
+      ;;
+   \?)
+      echo "Invalid option: -$OPTARG" >&2
+      opt_h
+      exit 1
+      ;;
+   *)
+      echo "Internal error!"
+      exit 1
+      ;;
+   esac
+done
+
+# there are NO mandatory arguments
+if (( $# != 0 )); then
+   echo "Error: illegal number of parameters"
+   opt_h
+   exit 1
+fi
+
+
+
+sqlplus -s /nolog <<-EOF
+   WHENEVER OSERROR EXIT 9;
+   WHENEVER SQLERROR EXIT SQL.SQLCODE;
+   CONNECT $DBUSR/$DBPWD@$DBNAME;
+   SET ERRORLOGGING ON;
+   @@create.sql
+EOF

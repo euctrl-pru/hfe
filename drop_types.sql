@@ -1,0 +1,1 @@
+DROP TYPE area_group FORCE;
